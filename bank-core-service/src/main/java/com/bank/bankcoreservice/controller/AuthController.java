@@ -46,24 +46,34 @@ public class AuthController {
     // Endpoint ajutător pentru a crea useri rapid (doar pentru test)
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody LoginRequest request) {
+
+
+        if (request.getId() == null) {
+            return ResponseEntity.badRequest().body("Eroare: Trebuie să introduci un ID manual!");
+        }
+
+        if (userRepository.existsById(request.getId())) {
+            return ResponseEntity.badRequest().body("Eroare: ID-ul " + request.getId() + " este deja ocupat!");
+        }
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
+            return ResponseEntity.badRequest().body("Eroare: Username-ul există deja!");
         }
 
         User user = new User();
+        user.setId(request.getId());
+
         user.setUsername(request.getUsername());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-
         User savedUser = userRepository.save(user);
 
-        // Creăm automat și un cont pentru user
         Account account = new Account();
+        account.setId(savedUser.getId());
         account.setUser(savedUser);
         account.setBalance(BigDecimal.ZERO);
         account.setAccountNumber("RO" + System.currentTimeMillis());
 
         accountRepository.save(account);
 
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok("User registered successfully with ID: " + request.getId());
     }
 }

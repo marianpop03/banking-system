@@ -32,7 +32,7 @@ public class  RabbitMQConfig {
     @Bean
     public Jackson2JsonMessageConverter converter() {
         ObjectMapper mapper = new ObjectMapper();
-        // Această linie este CRUCIALĂ pentru a citi data trimisă de Core
+
         mapper.registerModule(new JavaTimeModule());
         return new Jackson2JsonMessageConverter(mapper);
     }
